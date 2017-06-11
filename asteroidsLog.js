@@ -63,7 +63,7 @@ function ship(x, y, xs, ys, xa, ya, color) {
 
     this.checkCol = function() {
         for (var i=0; i<enemys.length; i++) {
-            if (this.x >= (enemys[i].x) && this.x <= (enemys[i].x +enemys[i].size) && this.y >= (enemys[i].y) && this.y <= (enemys[i].y + enemys[i].size)) {
+            if (this.x >= (enemys[i].x) && this.x <= (enemys[i].x +enemys[i].size + 5) && this.y >= (enemys[i].y) && this.y <= (enemys[i].y + enemys[i].size +5)) {
                 this.lives --;
                 this.cooloff = true;
                 this.coolsec = new Date().getSeconds();
