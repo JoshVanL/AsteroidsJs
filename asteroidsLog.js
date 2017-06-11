@@ -19,6 +19,8 @@ var enemys = [];
 var idB = 0;
 var idE = 0;
 var lock = true;
+var gameOver = false;
+
 
 function ship(x, y, xs, ys, xa, ya, color) {
     this.x = x;
@@ -29,6 +31,9 @@ function ship(x, y, xs, ys, xa, ya, color) {
     this.acc = 0.95;
     this.rotationspeed = 5;
     this.rotation = 0;
+    this.lives = 5;
+    this.cooloff = false;
+    this.coolsec = 0;
 
     this.update = function() {
         this.vx *= this.acc;
@@ -51,6 +56,22 @@ function ship(x, y, xs, ys, xa, ya, color) {
         ctx.lineTo(0,   0);
         ctx.stroke();
         ctx.restore();
+        if (!this.cooloff) this.checkCol();
+        else if (new Date().getSeconds() -1 >= this.coolsec) this.cooloff = false;
+    },
+
+    this.checkCol = function() {
+        for (var i=0; i<enemys.length; i++) {
+            if (this.x >= (enemys[i].x) && this.x <= (enemys[i].x +enemys[i].size) && this.y >= (enemys[i].y) && this.y <= (enemys[i].y + enemys[i].size)) {
+                this.lives --;
+                this.cooloff = true;
+                this.coolsec = new Date().getSeconds();
+                destroyEnem(enemys[i].id);
+                if (this.lives == 0) gameOver = true;
+                break;
+            }
+        }
+
     }
 }
 
@@ -60,18 +81,28 @@ function startGame() {
 }
 
 function updateGame() {
-    board.clear();
-    player.update();
-    console.log(enemys);
-    if (enemys.length < 4) newEnemy();
-    if (new Date().getSeconds() % 5 == 0 && !lock){
-        lock = true;
-        newEnemy();
+    if (!gameOver) {
+        board.clear();
+        board.context.font = "20px Sans";
+        board.context.fillStyle = "white";
+        board.context.fillText("Lives : " + player.lives,1,20);
+        player.update();
+        if (enemys.length < 4) newEnemy();
+        if (new Date().getSeconds() % 5 == 0 && !lock){
+            lock = true;
+            newEnemy();
+        } else {
+            if (new Date().getSeconds() % 10 == 1) lock = false;
+        }
+        for (var i=0; i<bullets.length; i++) bullets[i].update();
+        for (var i=0; i<enemys.length; i++) enemys[i].update();
     } else {
-        if (new Date().getSeconds() % 10 == 1) lock = false;
+        board.context.clearRect(0, 0, 120, 80);
+        board.context.font = "20px Sans";
+        board.context.fillStyle = "white";
+        board.context.fillText("Lives : " + player.lives,1,20);
+        board.context.fillText("Game Over!",1,50);
     }
-    for (var i=0; i<bullets.length; i++) bullets[i].update();
-    for (var i=0; i<enemys.length; i++) enemys[i].update();
 }
 
 onkeydown = function(event){
