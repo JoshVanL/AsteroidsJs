@@ -18,6 +18,7 @@ var bullets = [];
 var enemys = [];
 var idB = 0;
 var idE = 0;
+var lock = true;
 
 function ship(x, y, xs, ys, xa, ya, color) {
     this.x = x;
@@ -61,7 +62,14 @@ function startGame() {
 function updateGame() {
     board.clear();
     player.update();
-    if (enemys.length < 1) enemys.push(new enemy());
+    console.log(enemys);
+    if (enemys.length < 4) newEnemy();
+    if (new Date().getSeconds() % 5 == 0 && !lock){
+        lock = true;
+        newEnemy();
+    } else {
+        if (new Date().getSeconds() % 10 == 1) lock = false;
+    }
     for (var i=0; i<bullets.length; i++) bullets[i].update();
     for (var i=0; i<enemys.length; i++) enemys[i].update();
 }
@@ -69,7 +77,7 @@ function updateGame() {
 onkeydown = function(event){
     switch (event.keyCode) {
         case 32:
-            shootBullet();
+            if (bullets.length < 6) shootBullet();
             break;
 
         case 37:
@@ -112,9 +120,9 @@ function bullet(x, y, rotation) {
         this.x += this.vx;
         this.y -= this.vy;
         if (this.x <   0) destroyBul(this.id); 
-        if (this.x > 430) destroyBul(this.id); 
+        if (this.x > 450) destroyBul(this.id); 
         if (this.y <   0) destroyBul(this.id); 
-        if (this.y > 430) destroyBul(this.id); 
+        if (this.y > 450) destroyBul(this.id); 
         var ctx = board.context;
         ctx.beginPath();
         ctx.arc(this.x, this.y, 3, 0, 2*Math.PI, false);
@@ -146,20 +154,33 @@ function destroyBul(id) {
 function destroyEnem(id) {
     for (var i=0; i<enemys.length; i++) {
         if (enemys[i].id == id) {
+            var part = enemys[i].part;
+            if(part < 2) {
+                var x = enemys[i].x;
+                var y = enemys[i].y;
+                var size = enemys[i].size/2;
+                var vx = (Math.random() * 1.7) * (Math.round(Math.random()) * 2 - 1);
+                var vy = (Math.random() * 1.7) * (Math.round(Math.random()) * 2 - 1);
+                enemys.push(new enemy(x, y, vx, vy, size, part+1));
+                vx = (Math.random() * 1.7) * (Math.round(Math.random()) * 2 - 1);
+                vy = (Math.random() * 1.7) * (Math.round(Math.random()) * 2 - 1);
+                enemys.push(new enemy(x, y, vx, vy, size, part+1));
+            }
             enemys.splice(i, 1);
             break;
         }
     }
 }
 
-function enemy() {
-    this.x = (Math.random() * 450);
-    this.y = (Math.random() * 450);
-    this.vx = (Math.random() * 2) * (Math.round(Math.random()) * 2 - 1);
-    this.vy = (Math.random() * 2) * (Math.round(Math.random()) * 2 - 1);
-    this.size = Math.floor((Math.random() * 40)+30);
+function enemy(x, y, vx, vy, size, part) {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.size = size;
     this.id = idE;
     idE++;
+    this.part = part;
 
     this.update = function() {
         this.x += this.vx;
@@ -180,3 +201,11 @@ function enemy() {
     }
 }
 
+function newEnemy() {
+    var x = Math.random() * 450;
+    var y = Math.random() * 450;
+    var vx = (Math.random() * 1.5) * (Math.round(Math.random()) * 2 - 1);
+    var vy = (Math.random() * 1.5) * (Math.round(Math.random()) * 2 - 1);
+    var size = Math.floor((Math.random() * 40)+30);
+    enemys.push(new enemy(x, y, vx, vy, size, 0));
+}
