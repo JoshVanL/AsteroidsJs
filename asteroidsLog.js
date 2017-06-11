@@ -32,6 +32,7 @@ function ship(x, y, xs, ys, xa, ya, color) {
     this.rotationspeed = 5;
     this.rotation = 0;
     this.lives = 5;
+    this.score = 0;
     this.cooloff = false;
     this.coolsec = 0;
 
@@ -83,9 +84,10 @@ function startGame() {
 function updateGame() {
     if (!gameOver) {
         board.clear();
-        board.context.font = "20px Sans";
+        board.context.font = "16px Sans";
         board.context.fillStyle = "white";
-        board.context.fillText("Lives : " + player.lives,1,20);
+        board.context.fillText("Lives : " + player.lives,1,17);
+        board.context.fillText("Score : " + player.score,1,37);
         player.update();
         if (enemys.length < 4) newEnemy();
         if (new Date().getSeconds() % 5 == 0 && !lock){
@@ -98,10 +100,11 @@ function updateGame() {
         for (var i=0; i<enemys.length; i++) enemys[i].update();
     } else {
         board.context.clearRect(0, 0, 120, 80);
-        board.context.font = "20px Sans";
+        board.context.font = "16px Sans";
         board.context.fillStyle = "white";
-        board.context.fillText("Lives : " + player.lives,1,20);
-        board.context.fillText("Game Over!",1,50);
+        board.context.fillText("Lives : " + player.lives,1,17);
+        board.context.fillText("Score : " + player.score,1,37);
+        board.context.fillText("Game Over!",1,55);
     }
 }
 
@@ -167,6 +170,7 @@ function bullet(x, y, rotation) {
             if (this.x >= (enemys[i].x) && this.x <= (enemys[i].x +enemys[i].size) && this.y >= (enemys[i].y) && this.y <= (enemys[i].y + enemys[i].size)) {
                 destroyBul(this.id);
                 destroyEnem(enemys[i].id);
+                player.score++;
                 break;
             }
         }
@@ -212,6 +216,10 @@ function enemy(x, y, vx, vy, size, part) {
     this.id = idE;
     idE++;
     this.part = part;
+    if (this.x >= ship.x-10 && this.x <= ship.x +10  && this.y >= ship.y -10 && this.y <= ship.y + 10) {
+        this.x+= 100;
+        this.y+= 100;
+    }
 
     this.update = function() {
         this.x += this.vx;
